@@ -1,0 +1,57 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+def load_image(image_path):
+    """Load grayscale image."""
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    return image
+
+def load_mask(mask_path):
+    """Load binary mask."""
+    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+    return mask
+
+def overlay_mask(image, mask, color=(0, 255, 0), alpha=0.5):
+    """
+    Overlay mask on the image.
+    Parameters:
+        image: Grayscale image (2D)
+        mask: Binary mask (2D)
+        color: Tuple of RGB values
+        alpha: Transparency for overlay
+    """
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+    mask_colored = np.zeros_like(image_rgb)
+    mask_colored[mask > 0] = color
+
+    overlay = cv2.addWeighted(image_rgb, 1 - alpha, mask_colored, alpha, 0)
+    return overlay
+
+def show_image_with_mask(image, mask, method='matplotlib'):
+    """Display the image with mask using matplotlib or OpenCV."""
+    overlay = overlay_mask(image, mask)
+
+    if method == 'matplotlib':
+        plt.figure(figsize=(8, 8))
+        plt.imshow(cv2.cvtColor(overlay, cv2.COLOR_BGR2RGB))
+        plt.title('Image with Segmentation Overlay')
+        plt.axis('off')
+        plt.show()
+    elif method == 'opencv':
+        cv2.imshow('Image with Mask Overlay', overlay)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    else:
+        raise ValueError("Method should be 'matplotlib' or 'opencv'.")
+
+# Example usage
+if __name__ == "__main__":
+    # Replace with your file paths
+    image_path = 'medical_image.png'
+    mask_path = 'segmentation_mask.png'
+
+    image = load_image(image_path)
+    mask = load_mask(mask_path)
+
+    show_image_with_mask(image, mask, method='matplotlib')  # or 'opencv'
